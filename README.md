@@ -4,10 +4,10 @@ Public repo that builds the [iQbit](https://github.com/ntoporcov/iQbit/blob/mast
 ## Docker run:
 ```sh
 docker run -d \
-  --name iQbit \
+  --name qbittorrent-iQbit \
   --restart unless-stopped \
   -p 8081:8081 \
   -e TZ=Europe/Bucharest \
-  -e "QBIT_HOST=http://localhost:8080" \
+  -e QBIT_HOST="http://localhost:8080" \
   ghcr.io/rursache/iqbit-docker:latest
 ```
