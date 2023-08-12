@@ -3,7 +3,7 @@ name: Docker
 on: [push, pull_request, workflow_dispatch]
 
 env:
-  ENDPOINT: "rursache/iQbit-docker"
+  ENDPOINT: "rursache/iqbit-docker"
   BRANCH: "master"
 
 jobs:
@@ -15,30 +15,32 @@ jobs:
       - name: Build image
         run: |
           docker build --no-cache -t ${{ github.sha }} .
+
       - name: Tag image
-        if: ${{ github.ref == format('refs/heads/{0}', env.BRANCH) && env.ENDPOINT != 'user/endpoint' }}
+        if: ${{ github.ref == format('refs/heads/{0}', env.BRANCH) }}
         run: |
           docker tag ${{ github.sha }} ${ENDPOINT}
           docker tag ${{ github.sha }} ${ENDPOINT}:${{ github.sha }}
           docker tag ${{ github.sha }} ghcr.io/${ENDPOINT}
           docker tag ${{ github.sha }} ghcr.io/${ENDPOINT}:${{ github.sha }}
+
       - name: Credential check
-        if: ${{ github.ref == format('refs/heads/{0}', env.BRANCH) && env.ENDPOINT != 'user/endpoint' }}
+        if: ${{ github.ref == format('refs/heads/{0}', env.BRANCH) }}
         run: |
           echo "CR_USER=${{ secrets.CR_USER }}" >> $GITHUB_ENV
           echo "CR_PAT=${{ secrets.CR_PAT }}" >> $GITHUB_ENV
-          echo "DOCKERUSER=${{ secrets.DOCKERUSER }}" >> $GITHUB_ENV
-          echo "DOCKERPASS=${{ secrets.DOCKERPASS }}" >> $GITHUB_ENV
-          if [[ "${{ secrets.CR_USER }}" == "" && "${{ secrets.CR_PAT }}" == "" && "${{ secrets.DOCKERUSER }}" == "" && "${{ secrets.DOCKERPASS }}" == "" ]]; then
+          if [[ "${{ secrets.CR_USER }}" == "" && "${{ secrets.CR_PAT }}" == "" ]]; then
             echo "::error::Push credential secrets missing."
-            echo "::error::You must set either CR_USER & CR_PAT or DOCKERUSER & DOCKERPASS as secrets in your repo settings."
+            echo "::error::You must set CR_USER & CR_PAT as secrets in your repo settings."
             echo "::error::See https://github.com/linuxserver/docker-mods/blob/master/README.md for more information/instructions."
             exit 1
           fi
+
       - name: Login to GitHub Container Registry
         if: ${{ github.ref == format('refs/heads/{0}', env.BRANCH) && env.CR_USER && env.CR_PAT && env.ENDPOINT != 'user/endpoint' }}
         run: |
           echo "${{ secrets.CR_PAT }}" | docker login ghcr.io -u ${{ secrets.CR_USER }} --password-stdin
+
       - name: Push tags to GitHub Container Registry
         if: ${{ github.ref == format('refs/heads/{0}', env.BRANCH) && env.CR_USER && env.CR_PAT && env.ENDPOINT != 'user/endpoint' }}
         run: |
