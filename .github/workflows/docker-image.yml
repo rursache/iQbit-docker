@@ -1,6 +1,10 @@
 name: Docker
 
-on: [push, pull_request, workflow_dispatch]
+on: 
+  push:
+  workflow_dispatch:
+  schedule:
+      - cron: "0 8 * * *"
 
 env:
   ENDPOINT: "rursache/iqbit-docker"
